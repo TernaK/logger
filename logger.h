@@ -63,6 +63,6 @@ namespace logger_namespace {
   public:
     Loggable() = default;
     Loggable(Logger::Header&& header);
-    void log(Logger::Row&& row);
+    void log(Logger::Row&& row, bool immediately = false);
   };
 }

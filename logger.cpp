@@ -106,6 +106,9 @@ Loggable::Loggable(Logger::Header&& header)
   Logger::logger()->add_header(header);
 }
 
-void Loggable::log(Logger::Row&& row) {
-  Logger::logger()->log(std::move(row));
+void Loggable::log(Logger::Row&& row, bool immediately) {
+  if(immediately)
+    Logger::logger()->log(std::move(row));
+  else
+    Logger::logger()->push_row(std::move(row));
 }
