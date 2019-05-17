@@ -5,7 +5,7 @@ struct LoggableTestClass1 : public Loggable {
   LoggableTestClass1() : Loggable({"POS", {"x", "y", "good"}}) { }
 
   void run() {
-    log({"POS", {{"x",std::to_string(5)}, {"y",std::to_string(5)}, {"good","yes"}}}, true);
+    log({"POS", {{"x",std::to_string(5)}, {"y",std::to_string(5)}, {"good","yes"}}});
   }
 };
 
@@ -13,7 +13,7 @@ struct LoggableTestClass2 : public Loggable {
   LoggableTestClass2() : Loggable({"ALT", {"p", "r", "y"}}) { }
 
   void run() {
-    log({"ALT", {{"y",std::to_string(-1)}, {"p",std::to_string(1)}, {"r",std::to_string(-2)}}}, true);
+    log({"ALT", {{"y",std::to_string(-1)}, {"p",std::to_string(1)}, {"r",std::to_string(-2)}}});
   }
 };
 

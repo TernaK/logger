@@ -13,8 +13,7 @@
 namespace logger_namespace {
   class Logger {
     static constexpr bool DEFAULT_FILE_MODE = false;
-    static constexpr bool DEFAULT_ASYNC_MODE = false;
-    static constexpr bool DEFAULT_PERIOD_MS = 100;
+    static constexpr int DEFAULT_MAX_BUFFER = 100;
 
   public:
     struct Header {
@@ -32,29 +31,42 @@ namespace logger_namespace {
       Row() = default;
       Row(std::string title, std::unordered_map<std::string,std::string>&& key_values);
     };
-    void push_row(Logger::Row&& row);
-    void log(Logger::Row&& row);
+
+    /// @brief return singleton
+    static Logger* logger();
+
+    /// @brief add a row the logger and optionally write immediately
+    void log(Logger::Row&& row, bool immediately = false);
+
+    /// @brief add a header to the log
     void add_header(Logger::Header& header);
+
     std::string to_string(Row& row);
+
     std::string to_string(Header& row);
 
-    static Logger* logger();
     ~Logger();
 
   private:
     Logger(std::string log_name = "log.csv",
            bool file_mode = DEFAULT_FILE_MODE,
-           bool async = DEFAULT_ASYNC_MODE,
-           int period_ms = DEFAULT_PERIOD_MS);
-    void write(std::queue<Logger::Row>& rows);
-    static std::unique_ptr<Logger> instance;
-    std::unordered_map<std::string,Logger::Header> headers;
-    std::queue<Logger::Row> rows;
-    std::ofstream file;
-    bool file_mode;
-    std::thread write_thread;
-    std::mutex write_mutex;
-    std::atomic_bool run_flag {false};
+           int max_buffer = DEFAULT_MAX_BUFFER);
+
+    /// @brief write out each row in the buffer then empty
+    void write_rows_async();
+
+    void write_rows(std::queue<Logger::Row>&& rows);
+
+    void write_row(Logger::Row&& row);
+
+    static std::unique_ptr<Logger> instance;  ///< singleton
+    std::unordered_map<std::string,Logger::Header> headers; ///unique headers
+    std::queue<Logger::Row> rows; ///< row buffer
+    std::ofstream file; ///< for writing to file
+    bool file_mode;     ///< if true write to file else write to stdout
+    int max_buffer;     ///< max length of the row buffer
+    std::mutex write_mutex;   ///< thread safety
+    std::thread write_thread; ///< used to asynchronously clear the row buffer
   };
 
   class Loggable {
@@ -62,7 +74,9 @@ namespace logger_namespace {
 
   public:
     Loggable() = default;
+
     Loggable(Logger::Header&& header);
+
     void log(Logger::Row&& row, bool immediately = false);
   };
 }
