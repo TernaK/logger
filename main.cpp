@@ -1,10 +1,28 @@
 #include "logger.h"
+using namespace logger_namespace;
+
+struct LoggableTestClass1 : public Loggable {
+  LoggableTestClass1() : Loggable({"POS", {"x", "y", "good"}}) { }
+
+  void run() {
+    log({"POS", {{"x",std::to_string(5)}, {"y",std::to_string(5)}, {"good","yes"}}});
+  }
+};
+
+struct LoggableTestClass2 : public Loggable {
+  LoggableTestClass2() : Loggable({"ALT", {"p", "r", "y"}}) { }
+
+  void run() {
+    log({"ALT", {{"y",std::to_string(0)}, {"p",std::to_string(1)}, {"r",std::to_string(2)}}});
+    log({"ALT", {{"y",std::to_string(-1)}, {"p",std::to_string(1)}, {"r",std::to_string(-2)}}});
+  }
+};
 
 int main(int argc, char* args[]) {
-  Logger logger;
-  Logger::Header header("POS", {"x", "y", "z"});
-  Logger::Row row("POS", {{"x",std::to_string(0)}, {"y",std::to_string(1)}, {"z",std::to_string(2)}});
-  logger.add_header(header);
-  logger.push_row(row);
-  logger.write();
+  LoggableTestClass1 tester1;
+  LoggableTestClass2 tester2;
+  tester1.run();
+  tester2.run();
+  tester1.run();
+  tester2.run();
 }
