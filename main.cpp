@@ -18,6 +18,7 @@ struct LoggableTestClass2 : public Loggable {
 };
 
 int main(int argc, char* args[]) {
+  Logger::logger()->set_file_output("log.csv", 100);
   LoggableTestClass1 tester1;
   LoggableTestClass2 tester2;
   tester1.run();

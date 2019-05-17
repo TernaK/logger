@@ -11,8 +11,9 @@
 #include <chrono>
 
 namespace logger_namespace {
+  /// @class Logger
+  /// @brief Log data to the console or to a file. Buffering and asynchronous writing are possible.
   class Logger {
-    static constexpr bool DEFAULT_FILE_MODE = false;
     static constexpr int DEFAULT_MAX_BUFFER = 100;
 
   public:
@@ -35,10 +36,14 @@ namespace logger_namespace {
     /// @brief return singleton
     static Logger* logger();
 
-    /// @brief add a row the logger and optionally write immediately
+    /// @brief log to specified file & buffer logged rows
+    /// @param write out buffer if size > max_buffer_length
+    void set_file_output(std::string file_name, int max_buffer_length = DEFAULT_MAX_BUFFER);
+
+    /// @brief log a row and optionally write immediately
     void log(Logger::Row&& row, bool immediately = false);
 
-    /// @brief add a header to the log
+    /// @brief log a header
     void add_header(Logger::Header& header);
 
     std::string to_string(Row& row);
@@ -48,9 +53,7 @@ namespace logger_namespace {
     ~Logger();
 
   private:
-    Logger(std::string log_name = "log.csv",
-           bool file_mode = DEFAULT_FILE_MODE,
-           int max_buffer = DEFAULT_MAX_BUFFER);
+    Logger() = default;
 
     /// @brief write out each row in the buffer then empty
     void write_rows_async();
@@ -60,11 +63,11 @@ namespace logger_namespace {
     void write_row(Logger::Row&& row);
 
     static std::unique_ptr<Logger> instance;  ///< singleton
+    bool file_mode = false;   ///< if true write to file else write to stdout
+    int max_buffer = DEFAULT_MAX_BUFFER;  ///< max length of the rows buffer
     std::unordered_map<std::string,Logger::Header> headers; ///unique headers
-    std::queue<Logger::Row> rows; ///< row buffer
+    std::queue<Logger::Row> rows_buffer; ///< row buffer
     std::ofstream file; ///< for writing to file
-    bool file_mode;     ///< if true write to file else write to stdout
-    int max_buffer;     ///< max length of the row buffer
     std::mutex write_mutex;   ///< thread safety
     std::thread write_thread; ///< used to asynchronously clear the row buffer
   };
