@@ -15,6 +15,7 @@ namespace logger_namespace {
   /// @brief Log data to the console or to a file. Buffering and asynchronous writing as soon as the buffer is full is done in file mode.
   class Logger {
     static constexpr int DEFAULT_MAX_BUFFER = 100;
+    static constexpr int DEFAULT_FLOW_CONTROL = 5;
 
   public:
     struct Header {
@@ -38,7 +39,9 @@ namespace logger_namespace {
 
     /// @brief log to specified file & buffer logged rows
     /// @param write out buffer if size > max_buffer_length
-    void set_file_output(std::string file_name, int max_buffer_length = DEFAULT_MAX_BUFFER);
+    void set_file_output(std::string file_name,
+                         int max_buffer_length = DEFAULT_MAX_BUFFER,
+                         int flow_control = DEFAULT_FLOW_CONTROL);
 
     /// Wbrief log to stdout
     void set_console_output();
@@ -68,6 +71,7 @@ namespace logger_namespace {
     static std::unique_ptr<Logger> singleton;  ///< singleton
     bool file_mode = false;   ///< if true write to file else write to stdout
     int max_buffer = DEFAULT_MAX_BUFFER;  ///< max length of the rows buffer
+    int flow_control = DEFAULT_FLOW_CONTROL; ///< number of uninterrupted row writes
     std::unordered_map<std::string,Logger::Header> headers; ///unique headers
     std::queue<Logger::Row> rows_buffer; ///< row buffer
     std::ofstream file; ///< for writing to file
