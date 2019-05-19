@@ -40,6 +40,9 @@ namespace logger_namespace {
     /// @param write out buffer if size > max_buffer_length
     void set_file_output(std::string file_name, int max_buffer_length = DEFAULT_MAX_BUFFER);
 
+    /// Wbrief log to stdout
+    void set_console_output();
+
     /// @brief log a row and optionally write immediately
     void log(Logger::Row&& row, bool immediately = false);
 

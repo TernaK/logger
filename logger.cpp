@@ -45,6 +45,13 @@ void Logger::set_file_output(std::string file_name, int max_buffer_length) {
   max_buffer = max_buffer_length;
 }
 
+void Logger::set_console_output() {
+  std::lock_guard<std::mutex> lg(write_mutex);
+  if(write_thread.joinable())
+    write_thread.join();
+    file_mode = false;
+}
+
 void Logger::log(Logger::Row&& row, bool immediately) {
   std::lock_guard<std::mutex> lg(write_mutex);
   if(immediately) {
