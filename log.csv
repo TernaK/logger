@@ -1,6 +1,5 @@
-POS,x,y,good
-ALT,p,r,y
-POS,5,5,yes
-ALT,1,-2,-1
-POS,5,5,yes
-ALT,1,-2,-1
+POSITION,x,y,good
+ATTITUDE,pitch,roll,yaw
+POSITION,5,5,yes
+ATTITUDE,1,-2,-1
+POSITION,5,5,yes

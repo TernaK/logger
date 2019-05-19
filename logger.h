@@ -12,7 +12,7 @@
 
 namespace logger_namespace {
   /// @class Logger
-  /// @brief Log data to the console or to a file. Buffering and asynchronous writing are possible.
+  /// @brief Log data to the console or to a file. Buffering and asynchronous writing as soon as the buffer is full is done in file mode.
   class Logger {
     static constexpr int DEFAULT_MAX_BUFFER = 100;
 
@@ -59,13 +59,13 @@ namespace logger_namespace {
     Logger() = default;
 
     /// @brief write out each row in the buffer then empty
-    void write_rows_async();
+    void write_buffer_async();
 
     void write_rows(std::queue<Logger::Row>&& rows);
 
     void write_row(Logger::Row&& row);
 
-    static std::unique_ptr<Logger> instance;  ///< singleton
+    static std::unique_ptr<Logger> singleton;  ///< singleton
     bool file_mode = false;   ///< if true write to file else write to stdout
     int max_buffer = DEFAULT_MAX_BUFFER;  ///< max length of the rows buffer
     std::unordered_map<std::string,Logger::Header> headers; ///unique headers

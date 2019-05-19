@@ -2,28 +2,39 @@
 using namespace logger_namespace;
 
 struct LoggableTestClass1 : public Loggable {
-  LoggableTestClass1() : Loggable({"POS", {"x", "y", "good"}}) { }
+  LoggableTestClass1() : Loggable({"POSITION", {"x", "y", "good"}}) { }
 
   void run() {
-    log({"POS", {{"x",std::to_string(5)}, {"y",std::to_string(5)}, {"good","yes"}}});
+    log({"POSITION", {{"x",std::to_string(5)}, {"y",std::to_string(5)}, {"good","yes"}}});
   }
 };
 
 struct LoggableTestClass2 : public Loggable {
-  LoggableTestClass2() : Loggable({"ALT", {"p", "r", "y"}}) { }
+  LoggableTestClass2() : Loggable({"ATTITUDE", {"pitch", "roll", "yaw"}}) { }
 
   void run() {
-    log({"ALT", {{"y",std::to_string(-1)}, {"p",std::to_string(1)}, {"r",std::to_string(-2)}}});
+    log({"ATTITUDE",
+      {{"yaw",std::to_string(-1)}, {"pitch",std::to_string(1)}, {"roll",std::to_string(-2)}}
+    });
   }
 };
 
 int main(int argc, char* args[]) {
-  int max_buffer_size = 100;
-  Logger::logger()->set_file_output("log.csv", max_buffer_size);
+
+  std::string log_file_name = "log.csv";
+  int max_buffer_size = 3;
+  Logger::logger()->set_file_output(log_file_name, max_buffer_size);
+
   LoggableTestClass1 tester1;
   LoggableTestClass2 tester2;
   tester1.run();
   tester2.run();
   tester1.run();
+
+  Logger::logger()->set_console_output();
+  tester1.run();
   tester2.run();
+  tester2.run();
+  tester1.run();
+
 }
