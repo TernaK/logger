@@ -21,11 +21,6 @@ Logger::Header::Header(std::string title, std::vector<std::string>&& header)
 std::unique_ptr<Logger> Logger::singleton = nullptr;
 
 Logger::~Logger() {
-  write_buffer_async();
-
-  if(write_thread.joinable())
-    write_thread.join();
-
   if(file_mode) {
     if(file.is_open())
       file.close();
@@ -38,38 +33,15 @@ Logger* Logger::logger() {
   return singleton.get();
 }
 
-void Logger::set_file_output(std::string file_name, int max_buffer_length, int flow_control) {
+void Logger::set_file_output(std::string file_name) {
   std::lock_guard<std::mutex> lg(write_mutex);
   file_mode = true;
   file = std::ofstream(file_name);
-  max_buffer = max_buffer_length;
 }
 
-void Logger::set_console_output() {
-  write_buffer_async();
-  {
-    std::lock_guard<std::mutex> lg(write_mutex);
-    file_mode = false;
-  }
-  if(write_thread.joinable())
-    write_thread.join();
-}
-
-void Logger::log(Logger::Row&& row, bool immediately) {
-  if(immediately) {
-    //prevent writing at the same time
-    std::lock_guard<std::mutex> lg(write_mutex);
-    write_row(std::move(row));
-  } else {
-    {
-      //prevent pushing at the same time
-      std::lock_guard<std::mutex> lg(write_mutex);
-      rows_buffer.push(std::move(row));
-    }
-    if(rows_buffer.size() >= max_buffer) {
-      write_buffer_async();
-    }
-  }
+void Logger::log(Logger::Row&& row) {
+  std::lock_guard<std::mutex> lg(write_mutex);
+  write_row(std::move(row));
 }
 
 void Logger::add_header(Logger::Header& header) {
@@ -81,37 +53,7 @@ void Logger::add_header(Logger::Header& header) {
 }
 
 void Logger::write_row(Logger::Row&& row) {
-  (file_mode==true ? file : std::cout) << to_string(row) << std::endl;
-}
-
-void Logger::write_rows(std::queue<Logger::Row>&& to_write) {
-  if(to_write.empty())
-    return;
-
-  int block = flow_control; //write N times as fast as push for flow control
-  int num_blocks = std::max(1, (int)to_write.size()/block);
-  for(int i = 0; i < num_blocks; i++) {
-    std::lock_guard<std::mutex> lg(write_mutex);
-    int j = 0;
-    while(!to_write.empty() && j < block) {
-      write_row(std::move(to_write.front()));
-      to_write.pop();
-      j++;
-    }
-  }
-}
-
-void Logger::write_buffer_async() {
-  std::queue<Logger::Row> rows_copy;
-  {
-    std::lock_guard<std::mutex> lg(write_mutex);
-    rows_copy = std::move(rows_buffer);
-    rows_buffer = { };
-  }
-
-  if(write_thread.joinable())
-    write_thread.join();
-  write_thread = std::thread(&Logger::write_rows, this, std::move(rows_copy));
+  file << to_string(row) << std::endl;
 }
 
 std::string Logger::to_string(Row& row) {
@@ -140,6 +82,6 @@ Loggable::Loggable(Logger::Header&& header)
   Logger::logger()->add_header(header);
 }
 
-void Loggable::log(Logger::Row&& row, bool immediately) {
-  Logger::logger()->log(std::move(row), immediately);
+void Loggable::log(Logger::Row&& row) {
+  Logger::logger()->log(std::move(row));
 }

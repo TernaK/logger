@@ -22,18 +22,14 @@ struct LoggableTestClass2 : public Loggable {
 int main(int argc, char* args[]) {
 
   std::string log_file_name = "log.csv";
-  int max_buffer_size = 3;
-  Logger::logger()->set_file_output(log_file_name, max_buffer_size);
+  Logger::logger()->set_file_output(log_file_name);
 
   LoggableTestClass1 tester1;
   LoggableTestClass2 tester2;
   tester1.run();
   tester2.run();
   tester1.run();
-
-  Logger::logger()->set_console_output();
   tester1.run();
-  tester2.run();
   tester2.run();
   tester1.run();
 

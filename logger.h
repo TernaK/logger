@@ -12,23 +12,20 @@
 
 namespace logger_namespace {
   /// @class Logger
-  /// @brief Log data to the console or to a file. Buffering and asynchronous writing as soon as the buffer is full is done in file mode.
+  /// @brief Log data to a file.
   class Logger {
-    static constexpr int DEFAULT_MAX_BUFFER = 100;
-    static constexpr int DEFAULT_FLOW_CONTROL = 5;
-
   public:
     struct Header {
-      std::unordered_map<int,std::string> index_keys;
       std::string title;
+      std::unordered_map<int,std::string> index_keys;
 
       Header() = default;
       Header(std::string title, std::vector<std::string>&& header);
     };
 
     struct Row {
-      std::unordered_map<std::string,std::string> key_values;
       std::string title;
+      std::unordered_map<std::string,std::string> key_values;
 
       Row() = default;
       Row(std::string title, std::unordered_map<std::string,std::string>&& key_values);
@@ -39,15 +36,10 @@ namespace logger_namespace {
 
     /// @brief log to specified file & buffer logged rows
     /// @param write out buffer if size > max_buffer_length
-    void set_file_output(std::string file_name,
-                         int max_buffer_length = DEFAULT_MAX_BUFFER,
-                         int flow_control = DEFAULT_FLOW_CONTROL);
+    void set_file_output(std::string file_name);
 
-    /// Wbrief log to stdout
-    void set_console_output();
-
-    /// @brief log a row and optionally write immediately
-    void log(Logger::Row&& row, bool immediately = false);
+    /// @brief log a row
+    void log(Logger::Row&& row);
 
     /// @brief log a header
     void add_header(Logger::Header& header);
@@ -61,22 +53,13 @@ namespace logger_namespace {
   private:
     Logger() = default;
 
-    /// @brief write out each row in the buffer then empty
-    void write_buffer_async();
-
-    void write_rows(std::queue<Logger::Row>&& rows);
-
     void write_row(Logger::Row&& row);
 
-    static std::unique_ptr<Logger> singleton;  ///< singleton
-    bool file_mode = false;   ///< if true write to file else write to stdout
-    int max_buffer = DEFAULT_MAX_BUFFER;  ///< max length of the rows buffer
-    int flow_control = DEFAULT_FLOW_CONTROL; ///< number of uninterrupted row writes
+    static std::unique_ptr<Logger> singleton; ///< singleton
+    bool file_mode = false; ///< if true write to file else write to stdout
     std::unordered_map<std::string,Logger::Header> headers; ///unique headers
-    std::queue<Logger::Row> rows_buffer; ///< row buffer
-    std::ofstream file; ///< for writing to file
-    std::mutex write_mutex;   ///< thread safety
-    std::thread write_thread; ///< used to asynchronously clear the row buffer
+    std::ofstream file;     ///< for writing to file
+    std::mutex write_mutex; ///< thread safety
   };
 
   class Loggable {
@@ -87,6 +70,6 @@ namespace logger_namespace {
 
     Loggable(Logger::Header&& header);
 
-    void log(Logger::Row&& row, bool immediately = false);
+    void log(Logger::Row&& row);
   };
 }
